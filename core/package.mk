@@ -76,7 +76,7 @@ endif
 
 ifeq ($(filter tests, $(LOCAL_MODULE_TAGS)),)
 # Force localization check if it's not tagged as tests.
-LOCAL_AAPT_FLAGS := $(LOCAL_AAPT_FLAGS) -z
+#LOCAL_AAPT_FLAGS := $(LOCAL_AAPT_FLAGS) -z
 endif
 
 ifeq (,$(LOCAL_ASSET_DIR))
