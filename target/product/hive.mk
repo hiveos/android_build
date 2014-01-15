@@ -2,7 +2,6 @@ PRODUCT_PACKAGES := \
     libfwdlockengine \
     libWnnEngDic \
     libWnnJpnDic \
-    libwnndict \
     WAPPushManager
 
 # Additional settings used in all AOSP builds
@@ -23,17 +22,14 @@ PRODUCT_PACKAGES := \
     DeskClock \
     Bluetooth \
     Calculator \
-    Calendar \
     CertInstaller \
     InputDevices \
     Keyguard \
     LatinIME \
-    OneTimeInitializer \
     Provision \
     Settings \
     SystemUI \
     TeleService \
-    CalendarProvider \
     bluetooth-health \
     hostapd \
     wpa_supplicant.conf \
@@ -49,9 +45,6 @@ PRODUCT_PACKAGES += \
     pppd \
     sdptool \
     wpa_supplicant
-
-PRODUCT_PACKAGES += \
-    librs_jni
 
 PRODUCT_PACKAGES += \
     audio.primary.default \
