@@ -25,7 +25,6 @@ PRODUCT_PACKAGES := \
     CertInstaller \
     InputDevices \
     Keyguard \
-    LatinIME \
     Provision \
     Settings \
     SystemUI \
@@ -45,6 +44,9 @@ PRODUCT_PACKAGES += \
     pppd \
     sdptool \
     wpa_supplicant
+
+PRODUCT_PACKAGES += \
+    librs_jni
 
 PRODUCT_PACKAGES += \
     audio.primary.default \
