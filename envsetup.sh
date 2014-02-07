@@ -13,6 +13,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - jgrep:   Greps on all local Java files.
 - resgrep: Greps on all local res/*.xml files.
 - godir:   Go to the directory containing a file.
+- pushboot:Push a file from your OUT dir to your phone and reboots it, using absolute path.
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -79,18 +80,6 @@ function check_variant()
         fi
     done
     return 1
-}
-
-#credit cm
-function mka() {
-    case `uname -s` in
-        Darwin)
-            make -j `sysctl hw.ncpu|cut -d" " -f2` "$@"
-            ;;
-        *)
-            schedtool -B -n 1 -e ionice -n 1 make -j `cat /proc/cpuinfo | grep "^processor" | wc -l` "$@"
-            ;;
-    esac
 }
 
 function setpaths()
@@ -437,12 +426,6 @@ function add_lunch_combo()
     LUNCH_MENU_CHOICES=(${LUNCH_MENU_CHOICES[@]} $new_combo)
 }
 
-# add the default one here
-add_lunch_combo aosp_arm-eng
-add_lunch_combo aosp_x86-eng
-add_lunch_combo aosp_mips-eng
-add_lunch_combo vbox_x86-eng
-
 function print_lunch_menu()
 {
     local uname=$(uname)
@@ -531,6 +514,8 @@ function lunch()
 
     echo
 
+    fixup_common_out_dir
+
     set_stuff_for_environment
     printconfig
 }
@@ -585,6 +570,21 @@ function tapas()
 
     set_stuff_for_environment
     printconfig
+}
+
+function pushboot() {
+    if [ ! -f $OUT/$* ]; then
+        echo "File not found: $OUT/$*"
+        return 1
+    fi
+
+    adb root
+    sleep 1
+    adb wait-for-device
+    adb remount
+
+    adb push $OUT/$* /$*
+    adb reboot
 }
 
 function gettop
@@ -1343,6 +1343,41 @@ if [ "x$SHELL" != "x/bin/bash" ]; then
             ;;
     esac
 fi
+
+#credit cm
+function mka() {
+    case `uname -s` in
+        Darwin)
+            make -j `sysctl hw.ncpu|cut -d" " -f2` "$@"
+            ;;
+        *)
+            schedtool -B -n 1 -e ionice -n 1 make -j `cat /proc/cpuinfo | grep "^processor" | wc -l` "$@"
+            ;;
+    esac
+}
+
+function repopick() {
+    T=$(gettop)
+    $T/build/tools/repopick.py $@
+}
+
+function fixup_common_out_dir() {
+    common_out_dir=$(get_build_var OUT_DIR)/target/common
+    target_device=$(get_build_var TARGET_DEVICE)
+    if [ ! -z $CM_FIXUP_COMMON_OUT ]; then
+        if [ -d ${common_out_dir} ] && [ ! -L ${common_out_dir} ]; then
+            mv ${common_out_dir} ${common_out_dir}-${target_device}
+            ln -s ${common_out_dir}-${target_device} ${common_out_dir}
+        else
+            [ -L ${common_out_dir} ] && rm ${common_out_dir}
+            mkdir -p ${common_out_dir}-${target_device}
+            ln -s ${common_out_dir}-${target_device} ${common_out_dir}
+        fi
+    else
+        [ -L ${common_out_dir} ] && rm ${common_out_dir}
+        mkdir -p ${common_out_dir}
+    fi
+}
 
 # Execute the contents of any vendorsetup.sh files we can find.
 for f in `test -d device && find device -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null` \
